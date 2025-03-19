@@ -1,17 +1,17 @@
-import { useState, useEffect, useMemo } from "react";
-
+import React, { useState, useEffect, useMemo, memo } from "react";
 import "./index.css";
 
 function App() {
-  const [count, setCount] = useState(0);
   const [politici, setPolitici] = useState([]);
   const [search, setSearch] = useState("");
+
   useEffect(() => {
     fetch("https://boolean-spec-frontend.vercel.app/freetestapi/politicians")
       .then((res) => res.json())
       .then((data) => setPolitici(data))
       .catch((error) => console.error(error));
   }, []);
+
   const filteredPolitici = useMemo(() => {
     return politici.filter((p) => {
       const isNameIncluded = p.name
@@ -23,6 +23,21 @@ function App() {
       return isNameIncluded || isBioIncluded;
     });
   }, [politici, search]);
+
+  const PoliticiCard = memo(({ name, image, position, biography }) => {
+    console.log("card");
+    return (
+      <div className="card">
+        <h2>{name}</h2>
+        <img src={image} alt={name} />
+        <h3>
+          <strong>Posizione: </strong> {position}
+        </h3>
+        <p>{biography}</p>
+      </div>
+    );
+  });
+
   return (
     <>
       <input
@@ -34,15 +49,7 @@ function App() {
       <h1>Lista Politici</h1>
       <div className="politici-list">
         {filteredPolitici.map((p) => (
-          <div className="card" key={p.id}>
-            <img src={p.image} alt={p.name} />
-            <h2>{p.name}</h2>
-            <p>
-              <strong>Postion:</strong>
-              {p.position}
-            </p>
-            <p>{p.biography}</p>
-          </div>
+          <PoliticiCard key={p.id} {...p} />
         ))}
       </div>
     </>
